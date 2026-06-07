@@ -13,7 +13,10 @@
     "emitDeclarationOnly": true,
     "rootDir": "src",
     "outDir": "dist",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "#rules/*": ["./src/*"]
+    }
   },
   "include": ["src"]
 }

@@ -7,7 +7,15 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./med": "./src/med/index.ts"
+    "./med": "./src/med/index.ts",
+    "./med/core/authorization/*": "./src/med/core/authorization/*.ts",
+    "./med/core/requirements/*": "./src/med/core/requirements/*.ts",
+    "./med/core/applicable-standards/*": "./src/med/core/applicable-standards/*.ts",
+    "./med/evaluate": "./src/med/evaluate/index.ts",
+    "./med/evaluate/*": "./src/med/evaluate/*.ts"
+  },
+  "imports": {
+    "#rules/*": "./src/*"
   },
   "scripts": {
     "build": "tsc -b"
