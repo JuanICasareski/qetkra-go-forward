@@ -49,6 +49,15 @@
 }
 
 :root {
+    /* Qetkra brand tokens — navy ink + confident blue accent */
+    --qk-navy: #0a2138;
+    --qk-navy-soft: #12314f;
+    --qk-blue: #1463ff;
+    --qk-celeste: #4d9bff;
+    --qk-blue-dark: #0d4fd6;
+    --qk-blue-soft: #eef3ff;
+    --qk-line: #e6ebf2;
+
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);

@@ -3,19 +3,19 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { EvalProvider } from "./eval/context";
 import { Evaluator } from "./eval/Evaluator";
 import { Layout } from "./eval/Layout";
-import { Selector } from "./eval/Selector";
+import { NewProduct } from "./site/NewProduct";
 
 export function App() {
   return (
     <EvalProvider>
       <BrowserRouter>
         <Routes>
+          <Route index element={<Navigate to="/new-product" replace />} />
+          <Route path="new-product" element={<NewProduct />} />
           <Route element={<Layout />}>
-            <Route index element={<Navigate to="/sandbox" replace />} />
             <Route path="sandbox" element={<Evaluator />} />
-            <Route path="selector" element={<Selector />} />
-            <Route path="*" element={<Navigate to="/sandbox" replace />} />
           </Route>
+          <Route path="*" element={<Navigate to="/new-product" replace />} />
         </Routes>
       </BrowserRouter>
     </EvalProvider>

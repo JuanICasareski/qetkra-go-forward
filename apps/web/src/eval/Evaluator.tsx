@@ -86,7 +86,7 @@ export function Evaluator() {
   }, [state]);
 
   return (
-    <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-12">
+    <div className="mx-auto grid max-w-5xl grid-cols-1 gap-3 px-6 pb-10 lg:grid-cols-12">
       {/* Columna izquierda: info del producto + países, y flags type-specific */}
       <div className="space-y-4 lg:col-span-3">
         <Card>
