@@ -15,8 +15,6 @@ import { COUNTRIES, GENERAL_FLAGS, SPECIAL_FLAGS } from "../eval/metadata";
 import { ProductFields, TypeSpecificFields } from "../eval/sections";
 import { buildFlags } from "../eval/state";
 
-import { DocumentUploader, type UploadedDoc } from "./DocumentUploader";
-import { QetkraNav } from "./QetkraNav";
 
 const CERTAINTY_STYLE: Record<EvaluationResult["certainty"], string> = {
   certain:
@@ -149,7 +147,6 @@ export function NewProduct() {
     company: "",
     phone: "",
   });
-  const [docs, setDocs] = useState<UploadedDoc[]>([]);
   const [status, setStatus] = useState<SubmitStatus>("idle");
 
   const results = useMemo(() => {
@@ -171,9 +168,7 @@ export function NewProduct() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/20">
-      <QetkraNav />
-
+    <div className="bg-muted/20">
       {/* Título */}
       <div id="trabaja" className="mx-auto max-w-6xl px-6 pt-12 pb-2">
         <h1 className="text-3xl font-bold tracking-tight text-[var(--qk-navy)]">
@@ -237,14 +232,6 @@ export function NewProduct() {
 
         <Step
           n={2}
-          title="Documentación requerida"
-          desc="Subí todos los documentos que respaldan tu producto. No hay un mínimo: cargá los que necesites."
-        >
-          <DocumentUploader docs={docs} onChange={setDocs} />
-        </Step>
-
-        <Step
-          n={3}
           title="Características del producto"
           desc="Definí los atributos y propiedades que determinan la clasificación."
         >
@@ -260,7 +247,7 @@ export function NewProduct() {
         </Step>
 
         <Step
-          n={4}
+          n={3}
           title="Características regulatorias"
           desc="Activá las propiedades especiales y generales que apliquen."
         >
@@ -303,7 +290,7 @@ export function NewProduct() {
         </Step>
 
         <Step
-          n={5}
+          n={4}
           title="Mercados de certificación"
           desc="Elegí en qué países querés certificar tu producto."
         >
@@ -410,13 +397,6 @@ export function NewProduct() {
           )}
         </section>
       </main>
-
-      <footer className="border-t border-[var(--qk-line)] bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-6 text-xs text-muted-foreground sm:flex-row">
-          <span>© {new Date().getFullYear()} Qetkra · Safety that inspires</span>
-          <span>Módulo de aprobaciones médicas · AR · UE · US</span>
-        </div>
-      </footer>
     </div>
   );
 }

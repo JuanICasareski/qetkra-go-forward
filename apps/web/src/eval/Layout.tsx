@@ -25,7 +25,7 @@ export function Layout() {
           <NavLink to="/sandbox" className={linkClass}>
             Sandbox
           </NavLink>
-          <NavLink to="/new-product" className={linkClass}>
+          <NavLink to="/trabaja" className={linkClass}>
             Nuevo producto
           </NavLink>
         </nav>
