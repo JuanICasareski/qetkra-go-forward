@@ -10,8 +10,16 @@ type EvalContextValue = {
 
 const EvalContext = createContext<EvalContextValue | null>(null);
 
-export function EvalProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<FormState>(initialState);
+// `initial` permite montar instancias anidadas del provider con otro
+// estado de partida (p. ej. el editor de un producto ya guardado).
+export function EvalProvider({
+  children,
+  initial,
+}: {
+  children: ReactNode;
+  initial?: FormState;
+}) {
+  const [state, setState] = useState<FormState>(initial ?? initialState);
 
   const value = useMemo<EvalContextValue>(
     () => ({

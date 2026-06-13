@@ -4,6 +4,7 @@ import type { EvaluationResult } from "#rules/med/output";
 import { getClass } from "../core/applicable-standards/ar";
 import { getAuthorization } from "../core/authorization/ar";
 import { getRequirements } from "../core/requirements/ar";
+import { RULES_VERSION } from "../version";
 
 export default function evaluateAR(
   flags: MedicalProductFlags,
@@ -12,5 +13,5 @@ export default function evaluateAR(
   const authorization = getAuthorization(flags); // función autorización
   const requirements = getRequirements(flags); // documentación necesaria
 
-  return { certainty, authorization, standards, requirements };
+  return { certainty, authorization, standards, requirements, rulesVersion: RULES_VERSION };
 }

@@ -8,7 +8,14 @@ import type {
   SpecialFlags,
 } from "rules/med";
 
-import type { CountryCode } from "./metadata";
+import {
+  COMBINATION_FIELD_LABELS,
+  GENERAL_FLAGS,
+  IVD_FIELD_LABELS,
+  SAMD_FIELD_LABELS,
+  SPECIAL_FLAGS,
+  type CountryCode,
+} from "./metadata";
 
 export type SamdFlags = {
   significance: "inform" | "drive" | "treat_or_diagnose";
@@ -33,22 +40,35 @@ export type CombinationFlags = {
   substance_action: "ancillary" | "principal";
 };
 
+// Toda propiedad puede quedar sin responder (undefined). Mientras haya
+// campos sin responder no se puede determinar la clase del producto.
+export type Tri<T> = { [K in keyof T]: T[K] | undefined };
+
 export type FormState = {
-  device_type: DeviceType;
-  invasiveness: Invasiveness;
-  is_active: boolean;
-  contact_nature: BodyArea;
-  contact_duration: ContactDuration;
-  special: SpecialFlags;
-  general: GeneralFlags;
-  samd: SamdFlags;
-  ivd: IvdFlags;
-  combination: CombinationFlags;
+  device_type: DeviceType | undefined;
+  invasiveness: Invasiveness | undefined;
+  is_active: boolean | undefined;
+  contact_nature: BodyArea | undefined;
+  contact_duration: ContactDuration | undefined;
+  special: Tri<SpecialFlags>;
+  general: Tri<GeneralFlags>;
+  samd: Tri<SamdFlags>;
+  ivd: Tri<IvdFlags>;
+  combination: Tri<CombinationFlags>;
   countries: Record<CountryCode, boolean>;
 };
 
-const allFalse = <K extends string>(keys: readonly K[]): Record<K, boolean> =>
-  Object.fromEntries(keys.map((k) => [k, false])) as Record<K, boolean>;
+// Datos del producto: el FormState sin la selección de países (que es
+// propia de la evaluación, no del producto).
+export type ProductData = Omit<FormState, "countries">;
+
+const allUndefined = <K extends string, V>(
+  keys: readonly K[],
+): Record<K, V | undefined> =>
+  Object.fromEntries(keys.map((k) => [k, undefined])) as Record<
+    K,
+    V | undefined
+  >;
 
 const SPECIAL_KEYS: (keyof SpecialFlags)[] = [
   "has_pharmaceutical_substance",
@@ -89,52 +109,143 @@ const GENERAL_KEYS: (keyof GeneralFlags)[] = [
   "is_for_blood_transfusion_organ_transplant",
 ];
 
+const SAMD_KEYS: (keyof SamdFlags)[] = [
+  "significance",
+  "condition_severity",
+  "is_ai_ml_enabled",
+  "controls_other_device",
+];
+
+const IVD_KEYS: (keyof IvdFlags)[] = [
+  "detects_transmissible_agent",
+  "public_health_risk",
+  "individual_risk",
+  "is_self_testing",
+  "is_near_patient_testing",
+  "is_control_or_calibrator",
+  "is_screening_or_staging",
+];
+
+const COMBINATION_KEYS: (keyof CombinationFlags)[] = [
+  "primary_mode_of_action",
+  "is_integral",
+  "substance_action",
+];
+
+export const emptyProductData: ProductData = {
+  device_type: undefined,
+  invasiveness: undefined,
+  is_active: undefined,
+  contact_nature: undefined,
+  contact_duration: undefined,
+  special: allUndefined(SPECIAL_KEYS),
+  general: allUndefined(GENERAL_KEYS),
+  samd: allUndefined(SAMD_KEYS) as Tri<SamdFlags>,
+  ivd: allUndefined(IVD_KEYS) as Tri<IvdFlags>,
+  combination: allUndefined(COMBINATION_KEYS) as Tri<CombinationFlags>,
+};
+
 export const initialState: FormState = {
-  device_type: "implant",
-  invasiveness: "none",
-  is_active: false,
-  contact_nature: "skin",
-  contact_duration: "transient",
-  special: allFalse(SPECIAL_KEYS) as SpecialFlags,
-  general: allFalse(GENERAL_KEYS) as GeneralFlags,
-  samd: {
-    significance: "inform",
-    condition_severity: "non_serious",
-    is_ai_ml_enabled: false,
-    controls_other_device: false,
-  },
-  ivd: {
-    detects_transmissible_agent: false,
-    public_health_risk: "none",
-    individual_risk: "low",
-    is_self_testing: false,
-    is_near_patient_testing: false,
-    is_control_or_calibrator: false,
-    is_screening_or_staging: false,
-  },
-  combination: {
-    primary_mode_of_action: "device",
-    is_integral: false,
-    substance_action: "ancillary",
-  },
+  ...emptyProductData,
   countries: { ar: true, eu: true, us: true },
 };
 
-// Construye el objeto MedicalProductFlags que consumen los evaluadores,
-// anidando los flags type-specific segun el device_type.
-export function buildFlags(s: FormState): MedicalProductFlags {
+const BASE_FIELD_LABELS: [keyof ProductData, string][] = [
+  ["device_type", "Tipo de dispositivo"],
+  ["invasiveness", "Invasividad"],
+  ["contact_nature", "Zona del cuerpo"],
+  ["contact_duration", "Duración de contacto"],
+  ["is_active", "Dispositivo activo"],
+];
+
+// Lista de campos sin responder. Un producto con campos pendientes no
+// puede ser clasificado (métrica del charter: productos incompletos <15%).
+export function missingFields(s: ProductData): string[] {
+  const missing: string[] = [];
+
+  for (const [key, label] of BASE_FIELD_LABELS)
+    if (s[key] === undefined) missing.push(label);
+
+  for (const f of SPECIAL_FLAGS)
+    if (s.special[f.key] === undefined) missing.push(f.label);
+  for (const f of GENERAL_FLAGS)
+    if (s.general[f.key] === undefined) missing.push(f.label);
+
+  if (s.device_type === "samd")
+    for (const k of SAMD_KEYS)
+      if (s.samd[k] === undefined) missing.push(SAMD_FIELD_LABELS[k]);
+  if (s.device_type === "ivd")
+    for (const k of IVD_KEYS)
+      if (s.ivd[k] === undefined) missing.push(IVD_FIELD_LABELS[k]);
+  if (s.device_type === "combination")
+    for (const k of COMBINATION_KEYS)
+      if (s.combination[k] === undefined)
+        missing.push(COMBINATION_FIELD_LABELS[k]);
+
+  return missing;
+}
+
+export const isComplete = (s: ProductData): boolean =>
+  missingFields(s).length === 0;
+
+// Construye el objeto MedicalProductFlags que consumen los evaluadores.
+// Devuelve null si el producto está incompleto: con campos sin responder
+// no se puede determinar la clase ni la necesidad de aprobación.
+export function buildFlags(s: ProductData): MedicalProductFlags | null {
+  if (!isComplete(s)) return null;
+
   const general: Record<string, unknown> = { ...s.general };
   if (s.device_type === "samd") general.samd = s.samd;
   else if (s.device_type === "ivd") general.ivd = s.ivd;
   else if (s.device_type === "combination") general.combination = s.combination;
 
   return {
-    device_type: s.device_type,
-    invasiveness: s.invasiveness,
-    is_active: s.is_active,
-    contact_nature: s.contact_nature,
-    contact_duration: s.contact_duration,
-    special: s.special,
+    device_type: s.device_type!,
+    invasiveness: s.invasiveness!,
+    is_active: s.is_active!,
+    contact_nature: s.contact_nature!,
+    contact_duration: s.contact_duration!,
+    special: s.special as SpecialFlags,
     general: general as MedicalProductFlags["general"],
+  };
+}
+
+// Completa los campos sin responder con valores por defecto (útil en el
+// sandbox para probar las funciones sin cargar todo a mano).
+export function fillDefaults<T extends ProductData>(s: T): T {
+  const fillBools = <F extends object>(group: Tri<F>): Tri<F> =>
+    Object.fromEntries(
+      Object.entries(group).map(([k, v]) => [k, v ?? false]),
+    ) as Tri<F>;
+
+  return {
+    ...s,
+    device_type: s.device_type ?? "implant",
+    invasiveness: s.invasiveness ?? "none",
+    is_active: s.is_active ?? false,
+    contact_nature: s.contact_nature ?? "skin",
+    contact_duration: s.contact_duration ?? "transient",
+    special: fillBools(s.special),
+    general: fillBools(s.general),
+    samd: {
+      significance: s.samd.significance ?? "inform",
+      condition_severity: s.samd.condition_severity ?? "non_serious",
+      is_ai_ml_enabled: s.samd.is_ai_ml_enabled ?? false,
+      controls_other_device: s.samd.controls_other_device ?? false,
+    },
+    ivd: {
+      detects_transmissible_agent: s.ivd.detects_transmissible_agent ?? false,
+      public_health_risk: s.ivd.public_health_risk ?? "none",
+      individual_risk: s.ivd.individual_risk ?? "low",
+      is_self_testing: s.ivd.is_self_testing ?? false,
+      is_near_patient_testing: s.ivd.is_near_patient_testing ?? false,
+      is_control_or_calibrator: s.ivd.is_control_or_calibrator ?? false,
+      is_screening_or_staging: s.ivd.is_screening_or_staging ?? false,
+    },
+    combination: {
+      primary_mode_of_action: s.combination.primary_mode_of_action ?? "device",
+      is_integral: s.combination.is_integral ?? false,
+      substance_action: s.combination.substance_action ?? "ancillary",
+    },
   };
 }

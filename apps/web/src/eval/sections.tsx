@@ -1,5 +1,5 @@
 import { useEval } from "./context";
-import { BoolRow, EnumField } from "./fields";
+import { EnumField, TriBoolRow } from "./fields";
 import {
   BODY_AREAS,
   COMBINATION_PMOA,
@@ -42,7 +42,7 @@ export function ProductFields() {
         options={CONTACT_DURATIONS}
         onChange={(v) => set("contact_duration", v)}
       />
-      <BoolRow
+      <TriBoolRow
         label="Dispositivo activo"
         checked={state.is_active}
         onChange={(v) => set("is_active", v)}
@@ -54,6 +54,14 @@ export function ProductFields() {
 // Flags específicos según el tipo de dispositivo (SaMD / IVD / combinación).
 export function TypeSpecificFields() {
   const { state, set } = useEval();
+
+  if (state.device_type === undefined) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Seleccioná un tipo de dispositivo para ver sus flags específicos.
+      </p>
+    );
+  }
 
   if (state.device_type === "samd") {
     return (
@@ -70,12 +78,12 @@ export function TypeSpecificFields() {
           options={SAMD_SEVERITY}
           onChange={(v) => set("samd", { ...state.samd, condition_severity: v })}
         />
-        <BoolRow
+        <TriBoolRow
           label="Habilitado por IA/ML"
           checked={state.samd.is_ai_ml_enabled}
           onChange={(v) => set("samd", { ...state.samd, is_ai_ml_enabled: v })}
         />
-        <BoolRow
+        <TriBoolRow
           label="Controla otro dispositivo"
           checked={state.samd.controls_other_device}
           onChange={(v) => set("samd", { ...state.samd, controls_other_device: v })}
@@ -103,7 +111,7 @@ export function TypeSpecificFields() {
             set("combination", { ...state.combination, substance_action: v })
           }
         />
-        <BoolRow
+        <TriBoolRow
           label="Producto integral"
           checked={state.combination.is_integral}
           onChange={(v) =>
@@ -129,33 +137,33 @@ export function TypeSpecificFields() {
           options={IVD_INDIVIDUAL}
           onChange={(v) => set("ivd", { ...state.ivd, individual_risk: v })}
         />
-        <BoolRow
+        <TriBoolRow
           label="Detecta agente transmisible"
           checked={state.ivd.detects_transmissible_agent}
           onChange={(v) =>
             set("ivd", { ...state.ivd, detects_transmissible_agent: v })
           }
         />
-        <BoolRow
+        <TriBoolRow
           label="Autodiagnóstico"
           checked={state.ivd.is_self_testing}
           onChange={(v) => set("ivd", { ...state.ivd, is_self_testing: v })}
         />
-        <BoolRow
+        <TriBoolRow
           label="Point-of-care"
           checked={state.ivd.is_near_patient_testing}
           onChange={(v) =>
             set("ivd", { ...state.ivd, is_near_patient_testing: v })
           }
         />
-        <BoolRow
+        <TriBoolRow
           label="Control / calibrador"
           checked={state.ivd.is_control_or_calibrator}
           onChange={(v) =>
             set("ivd", { ...state.ivd, is_control_or_calibrator: v })
           }
         />
-        <BoolRow
+        <TriBoolRow
           label="Tamizaje / estadificación"
           checked={state.ivd.is_screening_or_staging}
           onChange={(v) =>

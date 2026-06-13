@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useEval } from "./context";
-import { BoolRow } from "./fields";
+import { TriBoolRow } from "./fields";
 import {
   BODY_AREAS,
   CONTACT_DURATIONS,
@@ -15,23 +15,32 @@ import {
   SPECIAL_FLAGS,
 } from "./metadata";
 import { ProductFields, TypeSpecificFields } from "./sections";
-import { initialState } from "./state";
+import { initialState, missingFields } from "./state";
 
 const labelOf = <T extends string>(
   options: readonly { value: T; label: string }[],
-  value: T,
-) => options.find((o) => o.value === value)?.label ?? value;
+  value: T | undefined,
+) =>
+  value === undefined
+    ? "Sin responder"
+    : (options.find((o) => o.value === value)?.label ?? value);
 
 export function Selector() {
   const { state, set, setState } = useEval();
 
   const activeFlags = useMemo(() => {
-    const s = SPECIAL_FLAGS.filter((f) => state.special[f.key]).map((f) => f.label);
-    const g = GENERAL_FLAGS.filter((f) => state.general[f.key]).map((f) => f.label);
+    const s = SPECIAL_FLAGS.filter((f) => state.special[f.key] === true).map(
+      (f) => f.label,
+    );
+    const g = GENERAL_FLAGS.filter((f) => state.general[f.key] === true).map(
+      (f) => f.label,
+    );
     return [...s, ...g];
   }, [state.special, state.general]);
 
-  const setAll = (value: boolean) =>
+  const missing = useMemo(() => missingFields(state), [state]);
+
+  const setAll = (value: boolean | undefined) =>
     setState((prev) => ({
       ...prev,
       special: Object.fromEntries(
@@ -47,13 +56,21 @@ export function Selector() {
       <div className="space-y-4 lg:col-span-2">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {activeFlags.length} flag(s) booleana(s) activa(s)
+            {activeFlags.length} flag(s) en sí · {missing.length} campo(s) sin
+            responder
           </p>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setAll(true)}>
-              Activar todas
+              Todas en sí
             </Button>
             <Button variant="outline" size="sm" onClick={() => setAll(false)}>
+              Todas en no
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAll(undefined)}
+            >
               Limpiar flags
             </Button>
           </div>
@@ -86,7 +103,7 @@ export function Selector() {
           <CardContent>
             <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
               {SPECIAL_FLAGS.map((f) => (
-                <BoolRow
+                <TriBoolRow
                   key={f.key}
                   label={f.label}
                   checked={state.special[f.key]}
@@ -104,7 +121,7 @@ export function Selector() {
           <CardContent>
             <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
               {GENERAL_FLAGS.map((f) => (
-                <BoolRow
+                <TriBoolRow
                   key={f.key}
                   label={f.label}
                   checked={state.general[f.key]}
@@ -126,6 +143,15 @@ export function Selector() {
             </Button>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
+            <div className="rounded-lg bg-muted px-3 py-2">
+              <p className="text-xs text-muted-foreground">Completitud</p>
+              <p className="font-medium">
+                {missing.length === 0
+                  ? "Producto completo: se puede determinar la clase."
+                  : `Faltan ${missing.length} campo(s): no se puede determinar la clase.`}
+              </p>
+            </div>
+
             <dl className="space-y-1">
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground">Tipo</dt>
@@ -154,7 +180,11 @@ export function Selector() {
               <div className="flex justify-between gap-2">
                 <dt className="text-muted-foreground">Activo</dt>
                 <dd className="text-right font-medium">
-                  {state.is_active ? "Sí" : "No"}
+                  {state.is_active === undefined
+                    ? "Sin responder"
+                    : state.is_active
+                      ? "Sí"
+                      : "No"}
                 </dd>
               </div>
             </dl>
@@ -164,7 +194,7 @@ export function Selector() {
                 Flags activas ({activeFlags.length})
               </p>
               {activeFlags.length === 0 ? (
-                <p className="text-muted-foreground">Ninguna flag booleana activa.</p>
+                <p className="text-muted-foreground">Ninguna flag en sí.</p>
               ) : (
                 <div className="flex flex-wrap gap-1.5">
                   {activeFlags.map((label) => (

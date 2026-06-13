@@ -7,12 +7,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 import type { Option } from "./metadata";
 
 export function EnumField<T extends string>(props: {
   label: string;
-  value: T;
+  value: T | undefined;
   options: readonly Option<T>[];
   onChange: (v: T) => void;
 }) {
@@ -21,9 +22,12 @@ export function EnumField<T extends string>(props: {
       <Label className="text-xs font-medium text-muted-foreground">
         {props.label}
       </Label>
-      <Select value={props.value} onValueChange={(v) => props.onChange(v as T)}>
+      <Select
+        value={props.value ?? ""}
+        onValueChange={(v) => props.onChange(v as T)}
+      >
         <SelectTrigger className="w-full">
-          <SelectValue />
+          <SelectValue placeholder="Sin responder" />
         </SelectTrigger>
         <SelectContent>
           {props.options.map((o) => (
@@ -37,6 +41,8 @@ export function EnumField<T extends string>(props: {
   );
 }
 
+// Booleano estricto (sí/no), para campos que no admiten "sin responder",
+// como la selección de países a evaluar.
 export function BoolRow(props: {
   label: string;
   checked: boolean;
@@ -47,5 +53,46 @@ export function BoolRow(props: {
       <span className="text-sm leading-snug">{props.label}</span>
       <Switch checked={props.checked} onCheckedChange={props.onChange} />
     </label>
+  );
+}
+
+// Booleano tri-estado: sí / no / sin responder. Volver a clickear la
+// opción activa la deselecciona y el campo queda sin responder.
+export function TriBoolRow(props: {
+  label: string;
+  checked: boolean | undefined;
+  onChange: (v: boolean | undefined) => void;
+}) {
+  const value =
+    props.checked === undefined ? "" : props.checked ? "yes" : "no";
+
+  return (
+    <div className="flex items-center justify-between gap-3 py-1.5">
+      <span
+        className={[
+          "text-sm leading-snug",
+          props.checked === undefined ? "text-muted-foreground" : "",
+        ].join(" ")}
+      >
+        {props.label}
+      </span>
+      <ToggleGroup
+        type="single"
+        size="sm"
+        variant="outline"
+        spacing={1}
+        value={value}
+        onValueChange={(v) =>
+          props.onChange(v === "" ? undefined : v === "yes")
+        }
+      >
+        <ToggleGroupItem value="yes" aria-label={`${props.label}: sí`}>
+          Sí
+        </ToggleGroupItem>
+        <ToggleGroupItem value="no" aria-label={`${props.label}: no`}>
+          No
+        </ToggleGroupItem>
+      </ToggleGroup>
+    </div>
   );
 }

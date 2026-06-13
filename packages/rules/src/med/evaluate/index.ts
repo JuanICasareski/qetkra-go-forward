@@ -4,6 +4,7 @@ import type { EvaluationResult } from "#rules/med/output";
 import evaluateAR from "./ar";
 import evaluateEU from "./eu";
 import evaluateUS from "./us";
+import { RULES_VERSION } from "../version";
 
 type EvaluateFn = (flags: MedicalProductFlags) => EvaluationResult;
 
@@ -18,6 +19,7 @@ const fallback: EvaluateFn = () => ({
   authorization: [],
   standards: [],
   requirements: [],
+  rulesVersion: RULES_VERSION,
 });
 
 export default function evaluate(

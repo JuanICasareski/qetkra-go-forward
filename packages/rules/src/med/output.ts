@@ -10,6 +10,10 @@ export type EvaluationResult<C extends Certainty = Certainty> = {
   authorization: string[];
   standards: string[];
   requirements: string[];
+  // Versión del cuerpo de reglas usado para producir este resultado
+  // (Flujo 7). Cada trámite la persiste para no perder el vínculo
+  // producto ↔ versión de norma cuando las reglas cambian.
+  rulesVersion: string;
 };
 
 export type EvalStandars = EvaluationResult["standards"];

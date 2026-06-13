@@ -1,84 +1,27 @@
 import { useMemo } from "react";
 
 import evaluate from "rules/med/evaluate";
-import type { EvaluationResult } from "rules/med";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 import { useEval } from "./context";
-import { BoolRow } from "./fields";
+import { BoolRow, TriBoolRow } from "./fields";
 import { COUNTRIES, GENERAL_FLAGS, SPECIAL_FLAGS } from "./metadata";
+import { ResultCard } from "./ResultCard";
 import { ProductFields, TypeSpecificFields } from "./sections";
-import { buildFlags } from "./state";
-
-const CERTAINTY_STYLE: Record<EvaluationResult["certainty"], string> = {
-  certain:
-    "border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
-  inferred:
-    "border-transparent bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
-  undetermined:
-    "border-transparent bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300",
-};
-
-const CERTAINTY_LABEL: Record<EvaluationResult["certainty"], string> = {
-  certain: "Certeza alta",
-  inferred: "Inferido",
-  undetermined: "Indeterminado",
-};
-
-function ResultList(props: { title: string; items: string[] }) {
-  if (props.items.length === 0) return null;
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {props.title}
-      </p>
-      <ul className="space-y-1">
-        {props.items.map((it, i) => (
-          <li key={i} className="text-sm leading-snug text-foreground/90">
-            • {it}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function ResultCard(props: { label: string; result: EvaluationResult }) {
-  const { result } = props;
-  const deviceClass = result.standards[0] ?? "—";
-  const rules = result.standards.slice(1);
-
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
-        <CardTitle className="text-base">{props.label}</CardTitle>
-        <Badge className={CERTAINTY_STYLE[result.certainty]}>
-          {CERTAINTY_LABEL[result.certainty]}
-        </Badge>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="rounded-lg bg-muted px-3 py-2">
-          <p className="text-xs text-muted-foreground">Clasificación</p>
-          <p className="text-2xl font-bold tracking-tight">{deviceClass}</p>
-        </div>
-        <ResultList title="Reglas aplicadas" items={rules} />
-        <Separator />
-        <ResultList title="Autorización / vía" items={result.authorization} />
-        <Separator />
-        <ResultList title="Requisitos" items={result.requirements} />
-      </CardContent>
-    </Card>
-  );
-}
+import { buildFlags, fillDefaults, missingFields } from "./state";
 
 export function Evaluator() {
-  const { state, set } = useEval();
+  const { state, set, setState } = useEval();
+
+  const missing = useMemo(() => missingFields(state), [state]);
 
   const results = useMemo(() => {
     const flags = buildFlags(state);
+    if (flags === null) return [];
     return COUNTRIES.filter((c) => state.countries[c.value]).map((c) => ({
       ...c,
       result: evaluate(c.value, flags),
@@ -136,7 +79,7 @@ export function Evaluator() {
               </p>
               <div className="divide-y">
                 {SPECIAL_FLAGS.map((f) => (
-                  <BoolRow
+                  <TriBoolRow
                     key={f.key}
                     label={f.label}
                     checked={state.special[f.key]}
@@ -153,7 +96,7 @@ export function Evaluator() {
               </p>
               <div className="divide-y">
                 {GENERAL_FLAGS.map((f) => (
-                  <BoolRow
+                  <TriBoolRow
                     key={f.key}
                     label={f.label}
                     checked={state.general[f.key]}
@@ -170,7 +113,36 @@ export function Evaluator() {
 
       {/* Columna derecha: resultados por país */}
       <div className="space-y-4 lg:col-span-5">
-        {results.length === 0 ? (
+        {missing.length > 0 ? (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
+              <CardTitle className="text-base">Producto incompleto</CardTitle>
+              <Badge variant="secondary">
+                {missing.length} campo(s) sin responder
+              </Badge>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                No se puede determinar la clase ni la necesidad de aprobación
+                médica hasta responder todas las propiedades del producto.
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {missing.map((label) => (
+                  <Badge key={label} variant="outline">
+                    {label}
+                  </Badge>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setState((prev) => fillDefaults(prev))}
+              >
+                Completar restantes con valores por defecto
+              </Button>
+            </CardContent>
+          </Card>
+        ) : results.length === 0 ? (
           <Card>
             <CardContent className="py-10 text-center text-sm text-muted-foreground">
               Seleccioná al menos un país para evaluar.

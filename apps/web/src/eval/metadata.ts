@@ -134,6 +134,30 @@ export const COMBINATION_SUBSTANCE: Option<"ancillary" | "principal">[] = [
   { value: "principal", label: "Principal" },
 ];
 
+// Labels de los campos type-specific, usados para reportar campos faltantes.
+export const SAMD_FIELD_LABELS = {
+  significance: "Significancia (decisión clínica)",
+  condition_severity: "Gravedad de la condición",
+  is_ai_ml_enabled: "Habilitado por IA/ML",
+  controls_other_device: "Controla otro dispositivo",
+} as const;
+
+export const IVD_FIELD_LABELS = {
+  detects_transmissible_agent: "Detecta agente transmisible",
+  public_health_risk: "Riesgo de salud pública",
+  individual_risk: "Riesgo individual",
+  is_self_testing: "Autodiagnóstico",
+  is_near_patient_testing: "Point-of-care",
+  is_control_or_calibrator: "Control / calibrador",
+  is_screening_or_staging: "Tamizaje / estadificación",
+} as const;
+
+export const COMBINATION_FIELD_LABELS = {
+  primary_mode_of_action: "Modo de acción primario",
+  is_integral: "Producto integral",
+  substance_action: "Acción de la sustancia",
+} as const;
+
 export const IVD_RISK3 = [
   { value: "none", label: "Ninguno" },
   { value: "moderate", label: "Moderado" },
