@@ -38,8 +38,11 @@ export function Layout() {
         <nav className="flex gap-1">
           {role === "client" && (
             <>
-              <NavLink to="/products" className={linkClass}>
+              <NavLink to="/products" end className={linkClass}>
                 Mis productos
+              </NavLink>
+              <NavLink to="/products/new" className={linkClass}>
+                Cargar producto
               </NavLink>
               <NavLink to="/cases" className={linkClass}>
                 Trámites
@@ -54,14 +57,12 @@ export function Layout() {
               <NavLink to="/review" className={linkClass}>
                 {withCount("Clases", pendingCases)}
               </NavLink>
+              {/* La Sandbox es una herramienta interna del staff de Qetkra. */}
+              <NavLink to="/sandbox" className={linkClass}>
+                Sandbox
+              </NavLink>
             </>
           )}
-          <NavLink to="/sandbox" className={linkClass}>
-            Sandbox
-          </NavLink>
-          <NavLink to="/selector" className={linkClass}>
-            Selector
-          </NavLink>
         </nav>
         <div className="flex items-center gap-2">
           <NotificationsBell />

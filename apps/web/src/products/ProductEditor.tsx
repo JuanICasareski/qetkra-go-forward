@@ -13,6 +13,8 @@ import { GENERAL_FLAGS, SPECIAL_FLAGS } from "@/eval/metadata";
 import { ProductFields, TypeSpecificFields } from "@/eval/sections";
 import {
   emptyProductData,
+  FIELD_ANCHOR,
+  firstMissingAnchor,
   missingFields,
   type FormState,
   type ProductData,
@@ -39,6 +41,8 @@ function EditorBody({ product }: { product: Product | undefined }) {
 
   const [name, setName] = useState(product?.name ?? "");
   const [manufacturer, setManufacturer] = useState(product?.manufacturer ?? "");
+  // El aviso de faltantes recién aparece tras intentar enviar a validación.
+  const [showMissingHint, setShowMissingHint] = useState(false);
 
   const missing = useMemo(() => missingFields(state), [state]);
   const canSave = name.trim() !== "" && manufacturer.trim() !== "";
@@ -56,6 +60,35 @@ function EditorBody({ product }: { product: Product | undefined }) {
     }
     if (submit) setProductStatus(id, "pending_validation");
     navigate("/products");
+  };
+
+  // Lleva la pantalla al primer campo sin responder y lo resalta. El anillo
+  // rojo se mantiene un momento y luego se desvanece con un fade suave.
+  const scrollToMissing = () => {
+    const anchor = firstMissingAnchor(toProductData(state));
+    const el = anchor ? document.getElementById(anchor) : null;
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    const ring = ["ring-2", "ring-destructive", "ring-offset-2"];
+    el.classList.add("transition-all", "duration-700", ...ring);
+    window.setTimeout(() => {
+      el.classList.remove(...ring); // dispara el fade (el ring es box-shadow)
+      window.setTimeout(
+        () => el.classList.remove("transition-all", "duration-700"),
+        700,
+      );
+    }, 1800);
+  };
+
+  // No se puede enviar a validación hasta responder TODO. Si falta algo,
+  // en vez de enviar, mostramos el aviso y saltamos al campo pendiente.
+  const submit = () => {
+    if (missing.length > 0) {
+      setShowMissingHint(true);
+      scrollToMissing();
+      return;
+    }
+    save(true);
   };
 
   return (
@@ -127,6 +160,7 @@ function EditorBody({ product }: { product: Product | undefined }) {
             {SPECIAL_FLAGS.map((f) => (
               <TriBoolRow
                 key={f.key}
+                anchorId={FIELD_ANCHOR.flag("special", f.key)}
                 label={f.label}
                 checked={state.special[f.key]}
                 onChange={(v) => set("special", { ...state.special, [f.key]: v })}
@@ -145,6 +179,7 @@ function EditorBody({ product }: { product: Product | undefined }) {
             {GENERAL_FLAGS.map((f) => (
               <TriBoolRow
                 key={f.key}
+                anchorId={FIELD_ANCHOR.flag("general", f.key)}
                 label={f.label}
                 checked={state.general[f.key]}
                 onChange={(v) => set("general", { ...state.general, [f.key]: v })}
@@ -166,11 +201,15 @@ function EditorBody({ product }: { product: Product | undefined }) {
       )}
 
       <div className="flex items-center justify-end gap-2">
-        {missing.length > 0 && (
-          <p className="mr-auto text-sm text-muted-foreground">
-            Podés guardar con propiedades sin responder, pero no se podrá
-            determinar la clase hasta completarlas.
-          </p>
+        {showMissingHint && missing.length > 0 && (
+          <button
+            type="button"
+            onClick={scrollToMissing}
+            className="mr-auto text-left text-sm text-destructive underline-offset-2 hover:underline"
+          >
+            Faltan {missing.length} propiedad(es) sin responder para poder
+            enviar a validación. Tocá acá para ir a la primera.
+          </button>
         )}
         <Button variant="outline" onClick={() => navigate("/products")}>
           Cancelar
@@ -178,7 +217,15 @@ function EditorBody({ product }: { product: Product | undefined }) {
         <Button variant="outline" disabled={!canSave} onClick={() => save(false)}>
           Guardar borrador
         </Button>
-        <Button disabled={!canSave} onClick={() => save(true)}>
+        <Button
+          disabled={!canSave}
+          title={
+            missing.length > 0
+              ? "Respondé todas las propiedades para habilitar el envío"
+              : undefined
+          }
+          onClick={submit}
+        >
           Guardar y enviar a validación
         </Button>
       </div>

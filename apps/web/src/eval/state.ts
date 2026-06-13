@@ -188,6 +188,43 @@ export function missingFields(s: ProductData): string[] {
 export const isComplete = (s: ProductData): boolean =>
   missingFields(s).length === 0;
 
+// Id de ancla DOM de cada campo, para poder scrollear hasta él. Se usa en
+// los componentes (al pintar el campo) y en `firstMissingAnchor` (al buscar
+// el primero sin responder), de modo que ambos lados queden sincronizados.
+export const FIELD_ANCHOR = {
+  base: (key: keyof ProductData) => `field-${key}`,
+  flag: (
+    group: "special" | "general" | "samd" | "ivd" | "combination",
+    key: string,
+  ) => `field-${group}-${key}`,
+};
+
+// Ancla del primer campo sin responder, en el mismo orden visual que el
+// formulario. Devuelve null si el producto está completo. Lo usa el editor
+// para llevar la pantalla justo a la respuesta que falta (Flujo 1).
+export function firstMissingAnchor(s: ProductData): string | null {
+  for (const [key] of BASE_FIELD_LABELS)
+    if (s[key] === undefined) return FIELD_ANCHOR.base(key);
+
+  for (const f of SPECIAL_FLAGS)
+    if (s.special[f.key] === undefined) return FIELD_ANCHOR.flag("special", f.key);
+  for (const f of GENERAL_FLAGS)
+    if (s.general[f.key] === undefined) return FIELD_ANCHOR.flag("general", f.key);
+
+  if (s.device_type === "samd")
+    for (const k of SAMD_KEYS)
+      if (s.samd[k] === undefined) return FIELD_ANCHOR.flag("samd", k);
+  if (s.device_type === "ivd")
+    for (const k of IVD_KEYS)
+      if (s.ivd[k] === undefined) return FIELD_ANCHOR.flag("ivd", k);
+  if (s.device_type === "combination")
+    for (const k of COMBINATION_KEYS)
+      if (s.combination[k] === undefined)
+        return FIELD_ANCHOR.flag("combination", k);
+
+  return null;
+}
+
 // Construye el objeto MedicalProductFlags que consumen los evaluadores.
 // Devuelve null si el producto está incompleto: con campos sin responder
 // no se puede determinar la clase ni la necesidad de aprobación.

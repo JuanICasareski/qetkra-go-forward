@@ -16,9 +16,10 @@ export function EnumField<T extends string>(props: {
   value: T | undefined;
   options: readonly Option<T>[];
   onChange: (v: T) => void;
+  anchorId?: string;
 }) {
   return (
-    <div className="space-y-1.5">
+    <div id={props.anchorId} className="scroll-mt-24 space-y-1.5 rounded-lg">
       <Label className="text-xs font-medium text-muted-foreground">
         {props.label}
       </Label>
@@ -62,12 +63,16 @@ export function TriBoolRow(props: {
   label: string;
   checked: boolean | undefined;
   onChange: (v: boolean | undefined) => void;
+  anchorId?: string;
 }) {
   const value =
     props.checked === undefined ? "" : props.checked ? "yes" : "no";
 
   return (
-    <div className="flex items-center justify-between gap-3 py-1.5">
+    <div
+      id={props.anchorId}
+      className="flex scroll-mt-24 items-center justify-between gap-3 rounded-lg px-1 py-1.5"
+    >
       <span
         className={[
           "text-sm leading-snug",
