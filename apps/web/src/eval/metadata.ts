@@ -244,6 +244,57 @@ export const GENERAL_FLAGS: Flag<keyof GeneralFlags>[] = [
   },
 ];
 
+// Descripciones de los campos base y type-specific (enums + bools), centralizadas
+// para compartirlas entre el editor (sections) y el resumen (ProductSummary).
+export const FIELD_HINTS = {
+  base: {
+    device_type:
+      "Categoría general del producto. Determina qué flags específicos aplican y es la base de la clasificación.",
+    invasiveness:
+      "Grado en que el dispositivo penetra en el cuerpo: no invasivo, por orificio corporal, quirúrgico o implantable.",
+    contact_nature:
+      "Parte del cuerpo con la que el dispositivo entra en contacto. Cuanto más crítica (corazón, SNC), mayor el riesgo.",
+    contact_duration:
+      "Tiempo de contacto continuo con el cuerpo: transitorio (< 60 min), corto plazo (hasta 30 días) o prolongado (> 30 días).",
+    is_active:
+      "Funciona con una fuente de energía (eléctrica, etc.) distinta de la generada por el cuerpo o la gravedad.",
+  },
+  samd: {
+    significance:
+      "Cuánto pesa el software en la decisión clínica: informa, orienta o directamente trata/diagnostica.",
+    condition_severity:
+      "Gravedad de la situación clínica del paciente sobre la que actúa el software: no grave, grave o crítica.",
+    is_ai_ml_enabled:
+      "El software usa inteligencia artificial o aprendizaje automático para producir sus resultados.",
+    controls_other_device:
+      "El software comanda o ajusta el funcionamiento de otro dispositivo médico.",
+  },
+  ivd: {
+    public_health_risk:
+      "Impacto de un resultado erróneo a nivel poblacional (p. ej. detección de agentes que pueden causar brotes).",
+    individual_risk:
+      "Impacto de un resultado erróneo para el paciente concreto al que se le hace el test.",
+    detects_transmissible_agent:
+      "El test detecta agentes infecciosos transmisibles (virus, bacterias) en sangre, tejidos u órganos.",
+    is_self_testing:
+      "Diseñado para que el propio paciente lo use sin intervención de un profesional (p. ej. test de embarazo).",
+    is_near_patient_testing:
+      "Se realiza junto al paciente, fuera del laboratorio central (p. ej. en la guardia o consultorio).",
+    is_control_or_calibrator:
+      "Es un material de control o calibración usado para verificar o ajustar otros ensayos, no un test diagnóstico en sí.",
+    is_screening_or_staging:
+      "Se usa para tamizaje poblacional o para determinar el estadio de una enfermedad (p. ej. estadificación de un cáncer).",
+  },
+  combination: {
+    primary_mode_of_action:
+      "Cuál es el efecto principal del producto combinado: el del dispositivo, el del fármaco o el biológico. Define el marco regulatorio aplicable.",
+    substance_action:
+      "Rol de la sustancia dentro del producto: accesoria (apoya al dispositivo) o principal (es el efecto buscado).",
+    is_integral:
+      "Dispositivo y sustancia forman una unidad inseparable (un solo producto), no componentes que se usan por separado.",
+  },
+} as const;
+
 // Opciones de los flags type-specific.
 export const SAMD_SIGNIFICANCE: Option<"inform" | "drive" | "treat_or_diagnose">[] = [
   { value: "inform", label: "Informa la decisión" },

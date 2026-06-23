@@ -19,8 +19,9 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 import type { Option } from "./metadata";
 
-// Icono "?" con tooltip que explica el campo. Reutilizado por EnumField y TriBoolRow.
-function HintIcon(props: { hint: string; label: string }) {
+// Icono "?" con tooltip que explica el campo. Reutilizado por EnumField, TriBoolRow
+// y el resumen de validación (ProductSummary).
+export function HintIcon(props: { hint: string; label: string }) {
   return (
     <TooltipProvider>
       <Tooltip>
