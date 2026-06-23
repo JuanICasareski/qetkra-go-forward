@@ -69,45 +69,179 @@ export const COUNTRIES = [
 
 export type CountryCode = (typeof COUNTRIES)[number]["value"];
 
+export type Flag<K extends string> = { key: K; label: string; hint: string };
+
 // Special flags ordenados por prioridad (mayor impacto regulatorio primero).
-export const SPECIAL_FLAGS: { key: keyof SpecialFlags; label: string }[] = [
-  { key: "has_pharmaceutical_substance", label: "Incorpora sustancia farmacológica" },
-  { key: "has_nonviable_biological_tissue", label: "Tejidos/células biológicas no viables" },
-  { key: "is_closed_loop", label: "Lazo cerrado (terapia + diagnóstico)" },
-  { key: "has_systemically_absorbed_substance", label: "Sustancia con absorción sistémica" },
-  { key: "is_breast_implant", label: "Implante mamario" },
-  { key: "is_surgical_mesh", label: "Malla quirúrgica" },
-  { key: "is_contraceptive", label: "Función anticonceptiva" },
-  { key: "is_std_prevention", label: "Prevención de ETS" },
-  { key: "delivers_inhaled_medication", label: "Administra medicación inhalada" },
-  { key: "has_nanomaterials", label: "Contiene nanomateriales" },
-  { key: "emits_ionizing_radiation", label: "Emite radiación ionizante" },
-  { key: "xray_image_recording", label: "Registro de imágenes por rayos X" },
-  { key: "has_recombinant_dna", label: "Contiene ADN recombinante" },
+export const SPECIAL_FLAGS: Flag<keyof SpecialFlags>[] = [
+  {
+    key: "has_pharmaceutical_substance",
+    label: "Incorpora sustancia farmacológica",
+    hint: "El dispositivo incluye un fármaco con acción auxiliar sobre el cuerpo (p. ej. stent liberador de droga). Suele elevar la clase de riesgo.",
+  },
+  {
+    key: "has_nonviable_biological_tissue",
+    label: "Tejidos/células biológicas no viables",
+    hint: "Contiene tejidos o derivados de origen humano o animal sin capacidad de vida (p. ej. colágeno, válvulas porcinas).",
+  },
+  {
+    key: "is_closed_loop",
+    label: "Lazo cerrado (terapia + diagnóstico)",
+    hint: "Mide una variable del paciente y administra terapia automáticamente según esa medición, sin intervención humana (p. ej. bomba de insulina con sensor).",
+  },
+  {
+    key: "has_systemically_absorbed_substance",
+    label: "Sustancia con absorción sistémica",
+    hint: "El producto introduce sustancias que se absorben en todo el organismo, no sólo localmente.",
+  },
+  {
+    key: "is_breast_implant",
+    label: "Implante mamario",
+    hint: "Implante de mama. Categoría con régimen regulatorio específico y de alto riesgo.",
+  },
+  {
+    key: "is_surgical_mesh",
+    label: "Malla quirúrgica",
+    hint: "Malla implantable para reforzar tejidos (p. ej. hernias, prolapsos).",
+  },
+  {
+    key: "is_contraceptive",
+    label: "Función anticonceptiva",
+    hint: "Dispositivo destinado a prevenir el embarazo (p. ej. DIU, preservativo).",
+  },
+  {
+    key: "is_std_prevention",
+    label: "Prevención de ETS",
+    hint: "Diseñado para prevenir la transmisión de enfermedades de transmisión sexual.",
+  },
+  {
+    key: "delivers_inhaled_medication",
+    label: "Administra medicación inhalada",
+    hint: "Suministra fármacos por vía inhalatoria (p. ej. nebulizadores, inhaladores).",
+  },
+  {
+    key: "has_nanomaterials",
+    label: "Contiene nanomateriales",
+    hint: "Incorpora nanomateriales con potencial exposición interna del paciente.",
+  },
+  {
+    key: "emits_ionizing_radiation",
+    label: "Emite radiación ionizante",
+    hint: "Genera radiación ionizante con fines terapéuticos o de diagnóstico (p. ej. equipos de radioterapia).",
+  },
+  {
+    key: "xray_image_recording",
+    label: "Registro de imágenes por rayos X",
+    hint: "Captura imágenes diagnósticas mediante rayos X (p. ej. radiografía, tomografía).",
+  },
+  {
+    key: "has_recombinant_dna",
+    label: "Contiene ADN recombinante",
+    hint: "Incluye material genético recombinante o productos de ingeniería genética.",
+  },
 ];
 
 // General flags ordenados por prioridad.
-export const GENERAL_FLAGS: { key: keyof GeneralFlags; label: string }[] = [
-  { key: "supports_life", label: "Sustenta la vida" },
-  { key: "controls_implantable_device", label: "Controla un dispositivo implantable" },
-  { key: "is_joint_replacement", label: "Reemplazo articular" },
-  { key: "is_spinal_disc_implant", label: "Implante de disco/columna" },
-  { key: "is_absorbable", label: "Absorbible" },
-  { key: "monitors_vital_params_immediate_danger", label: "Monitorea parámetros vitales (peligro inmediato)" },
-  { key: "delivers_potentially_dangerous_energy", label: "Entrega energía potencialmente peligrosa" },
-  { key: "administers_or_removes_substances", label: "Administra/extrae sustancias" },
-  { key: "modifies_biological_chemical_composition", label: "Modifica composición biológica/química" },
-  { key: "contacts_tissue_for_implant_in_vitro", label: "Contacto in vitro con tejido para implante" },
-  { key: "full_thickness_wound", label: "Heridas de espesor completo" },
-  { key: "manages_wound_microenvironment", label: "Maneja el microentorno de la herida" },
-  { key: "channels_or_stores_body_fluids", label: "Canaliza/almacena fluidos corporales" },
-  { key: "is_blood_bag", label: "Bolsa de sangre" },
-  { key: "is_for_blood_transfusion_organ_transplant", label: "Transfusión / trasplante de órganos" },
-  { key: "contacts_injured_skin", label: "Contacta piel lesionada" },
-  { key: "is_dental_placement", label: "Colocación dental" },
-  { key: "is_sterile", label: "Estéril" },
-  { key: "has_measuring_function", label: "Función de medición" },
-  { key: "is_reusable", label: "Reutilizable" },
+export const GENERAL_FLAGS: Flag<keyof GeneralFlags>[] = [
+  {
+    key: "supports_life",
+    label: "Sustenta la vida",
+    hint: "Su fallo o ausencia pone en riesgo inmediato la vida del paciente (p. ej. respirador, desfibrilador).",
+  },
+  {
+    key: "controls_implantable_device",
+    label: "Controla un dispositivo implantable",
+    hint: "Gobierna o programa un dispositivo activo implantado (p. ej. programador de marcapasos).",
+  },
+  {
+    key: "is_joint_replacement",
+    label: "Reemplazo articular",
+    hint: "Prótesis que sustituye una articulación completa (cadera, rodilla, hombro).",
+  },
+  {
+    key: "is_spinal_disc_implant",
+    label: "Implante de disco/columna",
+    hint: "Implante que reemplaza un disco intervertebral o estabiliza la columna.",
+  },
+  {
+    key: "is_absorbable",
+    label: "Absorbible",
+    hint: "Está diseñado para reabsorberse o degradarse dentro del cuerpo con el tiempo.",
+  },
+  {
+    key: "monitors_vital_params_immediate_danger",
+    label: "Monitorea parámetros vitales (peligro inmediato)",
+    hint: "Vigila signos vitales cuya variación implica peligro inmediato y requiere reacción urgente.",
+  },
+  {
+    key: "delivers_potentially_dangerous_energy",
+    label: "Entrega energía potencialmente peligrosa",
+    hint: "Aplica energía (eléctrica, térmica, lumínica, ultrasónica) que puede dañar si se descontrola.",
+  },
+  {
+    key: "administers_or_removes_substances",
+    label: "Administra/extrae sustancias",
+    hint: "Introduce o retira líquidos o sustancias del cuerpo (p. ej. bombas de infusión, sistemas de aspiración).",
+  },
+  {
+    key: "modifies_biological_chemical_composition",
+    label: "Modifica composición biológica/química",
+    hint: "Altera la composición de sangre, fluidos u otros líquidos corporales (p. ej. diálisis, oxigenación).",
+  },
+  {
+    key: "contacts_tissue_for_implant_in_vitro",
+    label: "Contacto in vitro con tejido para implante",
+    hint: "Entra en contacto con células o tejidos fuera del cuerpo que luego serán implantados.",
+  },
+  {
+    key: "full_thickness_wound",
+    label: "Heridas de espesor completo",
+    hint: "Indicado para heridas que comprometen todas las capas de la piel (dermis completa).",
+  },
+  {
+    key: "manages_wound_microenvironment",
+    label: "Maneja el microentorno de la herida",
+    hint: "Controla activamente las condiciones de la herida (humedad, presión, exudado).",
+  },
+  {
+    key: "channels_or_stores_body_fluids",
+    label: "Canaliza/almacena fluidos corporales",
+    hint: "Conduce o contiene fluidos del cuerpo (p. ej. catéteres, bolsas colectoras).",
+  },
+  {
+    key: "is_blood_bag",
+    label: "Bolsa de sangre",
+    hint: "Recipiente para recolección, almacenamiento o conservación de sangre.",
+  },
+  {
+    key: "is_for_blood_transfusion_organ_transplant",
+    label: "Transfusión / trasplante de órganos",
+    hint: "Destinado a procesos de transfusión sanguínea o trasplante de órganos.",
+  },
+  {
+    key: "contacts_injured_skin",
+    label: "Contacta piel lesionada",
+    hint: "Entra en contacto con piel dañada o mucosas (no piel intacta).",
+  },
+  {
+    key: "is_dental_placement",
+    label: "Colocación dental",
+    hint: "Se coloca o fija en la cavidad dental (p. ej. coronas, implantes dentales).",
+  },
+  {
+    key: "is_sterile",
+    label: "Estéril",
+    hint: "Se provee en estado estéril, lo que añade requisitos de proceso y validación.",
+  },
+  {
+    key: "has_measuring_function",
+    label: "Función de medición",
+    hint: "Realiza mediciones cuyo resultado se usa clínicamente (requiere control metrológico).",
+  },
+  {
+    key: "is_reusable",
+    label: "Reutilizable",
+    hint: "Diseñado para ser reprocesado y reutilizado, con requisitos de limpieza/esterilización.",
+  },
 ];
 
 // Opciones de los flags type-specific.

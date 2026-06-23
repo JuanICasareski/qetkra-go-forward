@@ -162,6 +162,7 @@ function EditorBody({ product }: { product: Product | undefined }) {
                 key={f.key}
                 anchorId={FIELD_ANCHOR.flag("special", f.key)}
                 label={f.label}
+                hint={f.hint}
                 checked={state.special[f.key]}
                 onChange={(v) => set("special", { ...state.special, [f.key]: v })}
               />
@@ -181,6 +182,7 @@ function EditorBody({ product }: { product: Product | undefined }) {
                 key={f.key}
                 anchorId={FIELD_ANCHOR.flag("general", f.key)}
                 label={f.label}
+                hint={f.hint}
                 checked={state.general[f.key]}
                 onChange={(v) => set("general", { ...state.general, [f.key]: v })}
               />

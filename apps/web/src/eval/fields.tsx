@@ -1,3 +1,5 @@
+import { CircleHelp } from "lucide-react";
+
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -7,9 +9,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 import type { Option } from "./metadata";
+
+// Icono "?" con tooltip que explica el campo. Reutilizado por EnumField y TriBoolRow.
+function HintIcon(props: { hint: string; label: string }) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            aria-label={`Qué es: ${props.label}`}
+            className="text-muted-foreground/60 transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+          >
+            <CircleHelp className="size-3.5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs text-left">
+          {props.hint}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 export function EnumField<T extends string>(props: {
   label: string;
@@ -17,11 +47,13 @@ export function EnumField<T extends string>(props: {
   options: readonly Option<T>[];
   onChange: (v: T) => void;
   anchorId?: string;
+  hint?: string;
 }) {
   return (
     <div id={props.anchorId} className="scroll-mt-24 space-y-1.5 rounded-lg">
-      <Label className="text-xs font-medium text-muted-foreground">
+      <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
         {props.label}
+        {props.hint ? <HintIcon hint={props.hint} label={props.label} /> : null}
       </Label>
       <Select
         value={props.value ?? ""}
@@ -64,6 +96,7 @@ export function TriBoolRow(props: {
   checked: boolean | undefined;
   onChange: (v: boolean | undefined) => void;
   anchorId?: string;
+  hint?: string;
 }) {
   const value =
     props.checked === undefined ? "" : props.checked ? "yes" : "no";
@@ -75,11 +108,12 @@ export function TriBoolRow(props: {
     >
       <span
         className={[
-          "text-sm leading-snug",
+          "flex items-center gap-1.5 text-sm leading-snug",
           props.checked === undefined ? "text-muted-foreground" : "",
         ].join(" ")}
       >
         {props.label}
+        {props.hint ? <HintIcon hint={props.hint} label={props.label} /> : null}
       </span>
       <ToggleGroup
         type="single"

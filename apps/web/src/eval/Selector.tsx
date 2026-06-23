@@ -106,6 +106,7 @@ export function Selector() {
                 <TriBoolRow
                   key={f.key}
                   label={f.label}
+                  hint={f.hint}
                   checked={state.special[f.key]}
                   onChange={(v) => set("special", { ...state.special, [f.key]: v })}
                 />
@@ -124,6 +125,7 @@ export function Selector() {
                 <TriBoolRow
                   key={f.key}
                   label={f.label}
+                  hint={f.hint}
                   checked={state.general[f.key]}
                   onChange={(v) => set("general", { ...state.general, [f.key]: v })}
                 />
